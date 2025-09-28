@@ -7,7 +7,7 @@ A new Flutter project.
 Нужен Flutter SDK 
 Весь основной код в папке lib
 
-##Запуск
+## Запуск
 ```
-Flutter run
+flutter run
 ```
