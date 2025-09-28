@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miro_prototype/features/whiteboard/presentation/providers/tool_state_provider.dart';
+import 'package:miro_prototype/models/draw_message.dart';
 import 'package:miro_prototype/whiteboard_providers.dart';
 import 'package:miro_prototype/features/whiteboard/domain/entities/whiteboard_element.dart';
 import 'package:miro_prototype/features/whiteboard/domain/entities/text_element.dart';
@@ -23,6 +24,7 @@ class _WhiteboardViewState extends ConsumerState<WhiteboardView> {
   late Path _currentPath;
   late Offset _lastPoint;
   bool _isDrawing = false;
+  late List<Point> _currentPoints;
 
   final GlobalKey _boardKey = GlobalKey();
 
@@ -30,6 +32,18 @@ class _WhiteboardViewState extends ConsumerState<WhiteboardView> {
   void initState() {
     super.initState();
     _currentPath = Path();
+    _currentPoints = [];
+
+    // Подключаемся к WebSocket при запуске
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(websocketServiceProvider).connect();
+    });
+  }
+
+  List<Point> _getPathPoints(Path path) {
+    // Это упрощённая реализация - в реальности нужно парсить Path
+    // Для простоты можно хранить точки отдельно во время рисования
+    return []; // Реализуй по необходимости
   }
 
   @override
@@ -49,6 +63,7 @@ class _WhiteboardViewState extends ConsumerState<WhiteboardView> {
             final localPos = _getLocalPosition(details.focalPoint, camera);
             _lastPoint = localPos;
             _currentPath = Path();
+            _currentPoints = [Point(localPos.dx, localPos.dy)];
             _currentPath.moveTo(localPos.dx, localPos.dy);
             setState(() {});
           }
@@ -65,6 +80,7 @@ class _WhiteboardViewState extends ConsumerState<WhiteboardView> {
               (localPos.dx + _lastPoint.dx) / 2,
               (localPos.dy + _lastPoint.dy) / 2,
             );
+            _currentPoints.add(Point(localPos.dx, localPos.dy));
             _lastPoint = localPos;
             setState(() {});
           }
@@ -92,6 +108,21 @@ class _WhiteboardViewState extends ConsumerState<WhiteboardView> {
         if (toolState.currentTool == DrawingTool.brush && _isDrawing) {
           if (_currentPath != Path()) {
             final metrics = _currentPath.computeMetrics();
+
+            final drawData = DrawData(
+              path: _currentPoints, // ← ИСПОЛЬЗУЕМ СОХРАНЁННЫЕ ТОЧКИ
+              color: _colorToString(toolState.brushColor),
+              strokeWidth: toolState.strokeWidth,
+            );
+
+            final message = DrawMessage(
+              type: 'draw',
+              data: drawData,
+              timestamp: DateTime.now(),
+            );
+
+            ref.read(websocketServiceProvider).sendMessage(message.toJson());
+
             if (metrics.isNotEmpty) {
               addPathElement(
                 ref,
@@ -118,6 +149,10 @@ class _WhiteboardViewState extends ConsumerState<WhiteboardView> {
         size: Size.infinite,
       ),
     );
+  }
+
+  String _colorToString(Color color) {
+    return '#${color.value.toRadixString(16).padLeft(8, '0')}';
   }
 
   Offset _getLocalPosition(Offset globalPosition, CameraState camera) {
