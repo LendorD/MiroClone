@@ -1,16 +1,37 @@
-# miro_prototype
+# Miro Clone - Flutter Whiteboard
 
-A new Flutter project.
+Клон Miro с возможностью рисования, масштабирования и панорамирования.
 
-## Getting Started
+## Функции
 
-This project is a starting point for a Flutter application.
+- ✏️ Плавное рисование от руки
+- 📏 Клеточный фон в стиле Miro/Figma
+- 🎨 Панель инструментов с выбором цвета и толщины
+- 🖱️ Перемещение и масштабирование доски
+- 🧹 Очистка доски
+- 👥 Подготовка к мультиплееру (WebSocket)
 
-A few resources to get you started if this is your first Flutter project:
+## Установка
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. Клонируйте репозиторий
+2. Выполните `flutter pub get`
+3. Запустите `flutter run`
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Технологии
+
+- Flutter
+- Riverpod (State Management)
+- Canvas API
+- CustomPainter
+
+## Планы
+
+- [ ] Мультиплеер через WebSocket
+- [ ] Бэкенд на Go
+- [ ] Текстовые блоки
+- [ ] Фигуры (прямоугольники, круги)
+- [ ] Undo/Redo
+- [ ] Сохранение досок
+
+
+![Uploading image.png…]()
